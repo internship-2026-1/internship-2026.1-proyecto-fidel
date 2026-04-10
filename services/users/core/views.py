@@ -4,4 +4,4 @@ from rest_framework import status
 
 class HelloWorldView(APIView):
     def get(self, request):
-        return Response({"message": "Hello, world!"}, status=status.HTTP_200_OK)
+        return Response({"message": "Hello, world si funciona o no?!"}, status=status.HTTP_200_OK)
