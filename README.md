@@ -1,7 +1,5 @@
 # internship-2026.1-proyecto-fidel
 proyecto de pasantia internship-2026-1
-<<<<<<< Updated upstream
-=======
 
 
 # IP-002 - Implementación de API Gateway con Nginx
@@ -32,4 +30,3 @@ proyecto de pasantia internship-2026-1
 
 
 ![imagen]()
->>>>>>> Stashed changes
