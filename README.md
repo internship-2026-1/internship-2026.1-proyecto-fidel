@@ -28,5 +28,5 @@ proyecto de pasantia internship-2026-1
 2. respuesta del status 200 ok 
 ![imagen](./evidencias_1/2-response_status_200_pk_hello_world.png)
 
-
-![imagen]()
+# sub-issues Configuracion de base de datos y Cliente para base datos
+![imagen](./evidencias_1/config_DB_add_client_base.png) 
