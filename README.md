@@ -30,3 +30,7 @@ proyecto de pasantia internship-2026-1
 
 # sub-issues Configuracion de base de datos y Cliente para base datos
 ![imagen](./evidencias_1/config_DB_add_client_base.png) 
+
+# sub-issues Servicio para registrar un usuario
+![imagen](./evidencias_1/registrar_usuario_evidencia_postman.png)
+![imagen](./evidencias_1/administrar_users_created.png)
