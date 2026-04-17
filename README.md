@@ -34,3 +34,12 @@ proyecto de pasantia internship-2026-1
 # sub-issues Servicio para registrar un usuario
 ![imagen](./evidencias_1/registrar_usuario_evidencia_postman.png)
 ![imagen](./evidencias_1/administrar_users_created.png)
+
+# sub-issues Autenticación (Login) + add campos (uuid,role) + structure responce
+![imagen](./evidencias_1/created_user.png)
+![imagen](./evidencias_1/login_user.png)
+
+# sub-issues Actualización de Perfil (Solo Datos Permitidos)
+![imagen](./evidencias_1/screen_update_for_patch.png)
+
+

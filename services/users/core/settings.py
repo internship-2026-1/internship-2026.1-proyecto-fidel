@@ -95,13 +95,15 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+#realize cambios aqui despues de listar usaurios quiza afecte
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.renderers.JSONRenderer',        
     ],
-    
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],   
     'EXCEPTION_HANDLER': 'apps.exceptions.standard_exception_handler',
 }
 

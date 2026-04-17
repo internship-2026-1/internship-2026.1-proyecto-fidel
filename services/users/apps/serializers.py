@@ -98,3 +98,25 @@ class UserListSerializer(serializers.ModelSerializer):
             'country',
             'date_joined',
         )
+
+
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    """Update authenticated user profile."""
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'address',
+            'phone_number',
+            'country',
+            'role',
+        )
+        read_only_fields = (
+            'email',
+            'username',
+            'role',
+        )
