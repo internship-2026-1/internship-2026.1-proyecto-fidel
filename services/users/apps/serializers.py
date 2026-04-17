@@ -2,12 +2,18 @@
 
 # Django
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth import authenticate
 from rest_framework import serializers
+
+#models
 from .models import User
 
+
 class UserRegisterSerializer(serializers.ModelSerializer):
+    """Created users."""
     password = serializers.CharField(write_only=True, min_length=8)
     phone = serializers.CharField(write_only=True)
+    role = serializers.CharField(required=False)
     created_at = serializers.DateTimeField(source='date_joined', read_only=True)
 
     class Meta:
@@ -20,7 +26,8 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             'first_name', 
             'last_name', 
             'phone', 
-            'created_at'
+            'created_at',
+            'role'
             )
     
     def validate_username(self, value):
@@ -55,3 +62,39 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             )
         user.save()
         return user
+
+class UserLoginSerializer(serializers.Serializer):
+    """For login users."""
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        user = authenticate(username=email, password=password)
+
+        if not user:
+            raise serializers.ValidationError('Credenciales inválidas.')
+
+        if not user.is_active:
+            raise serializers.ValidationError('Usuario inactivo.')
+
+        attrs['user'] = user
+        return attrs
+
+
+class UserListSerializer(serializers.ModelSerializer):
+    """list user"""
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'email',
+            'first_name',
+            'last_name',
+            'address',
+            'phone_number',
+            'country',
+            'date_joined',
+        )

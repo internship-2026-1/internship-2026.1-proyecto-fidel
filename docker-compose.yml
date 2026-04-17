@@ -24,6 +24,9 @@ services:
       - ./services/users:/app
     env_file:
       - .env
+    environment:
+      GATEWAY_API_KEY: ${GATEWAY_API_KEY}
+      GATEWAY_ORIGIN: ${GATEWAY_ORIGIN}
     ports:
       - "8000:8000"
     depends_on:

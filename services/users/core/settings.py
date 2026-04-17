@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt',#cambio JWT
     'drf_spectacular',
     'apps', # Registrar la app de usuarios
 ]
@@ -98,7 +99,10 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+    
+    'EXCEPTION_HANDLER': 'apps.exceptions.standard_exception_handler',
 }
 
 SPECTACULAR_SETTINGS = {
@@ -133,3 +137,6 @@ SPECTACULAR_SETTINGS = {
 }
 
 AUTH_USER_MODEL = 'apps.User'
+
+GATEWAY_API_KEY = os.environ.get('GATEWAY_API_KEY')
+GATEWAY_ORIGIN = os.environ.get('GATEWAY_ORIGIN')
