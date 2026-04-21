@@ -1,6 +1,7 @@
 """This is utilities"""
 
 from rest_framework import status as http_status
+from django.core import signing
 
 
 def build_response(*, success, message, body=None, status_code=None):
@@ -16,3 +17,15 @@ def build_response(*, success, message, body=None, status_code=None):
         "status": status_code,
     }
     return payload
+
+
+def generate_password_reset_token(user):
+    payload = {
+        'user_id': str(user.id),
+        'email': user.email,
+    }
+    return signing.dumps(payload, salt='password-reset')
+
+
+def verify_password_reset_token(token, max_age=900):
+    return signing.loads(token, salt='password-reset', max_age=max_age)

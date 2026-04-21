@@ -142,3 +142,22 @@ AUTH_USER_MODEL = 'apps.User'
 
 GATEWAY_API_KEY = os.environ.get('GATEWAY_API_KEY')
 GATEWAY_ORIGIN = os.environ.get('GATEWAY_ORIGIN')
+
+#resett and token
+PASSWORD_RESET_TOKEN_MAX_AGE = int(os.environ.get('PASSWORD_RESET_TOKEN_MAX_AGE', '900'))
+PASSWORD_RESET_CONFIRM_URL = os.environ.get(
+    'PASSWORD_RESET_CONFIRM_URL',
+    'http://localhost:8080/user/api/v1/auth/password-reset/confirm/'
+)
+
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'no-reply@example.com')
+
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.console.EmailBackend'
+)
+EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', '1') == '1'

@@ -6,12 +6,29 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .permissions import HasGatewayApiKey
-from .serializers import UserRegisterSerializer, UserLoginSerializer, UserListSerializer, UserProfileUpdateSerializer #
-from .utils import build_response
+
+from .utils import build_response, generate_password_reset_token, verify_password_reset_token
 from rest_framework.permissions import AllowAny
 from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
+
+
+# imports the apps
+from .serializers import (
+    UserRegisterSerializer,
+    UserLoginSerializer,
+    UserListSerializer,
+    UserProfileUpdateSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
+)
+
+from django.conf import settings
+from django.core.mail import send_mail
+from django.core.signing import BadSignature, SignatureExpired
+from .models import User
+
 
 class UserRegisterView(APIView):
     """created users view."""
@@ -172,9 +189,43 @@ class UserProfileUpdateView(APIView):
     permission_classes = [IsAuthenticated, HasGatewayApiKey]
 
     def patch(self, request):
+        email = request.data.get('email')
+
+        if not email:
+            payload = build_response(
+                success=False,
+                message='Errors validation',
+                body={'email': ['el correo es obligatorio para identificar al usurio.']},
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+        if request.user.email != email:
+            payload = build_response(
+                success=False,
+                message='no puedes realizar cambio',
+                body={'detail': 'correo no coicide con el auth.'},
+                status_code=status.HTTP_403_FORBIDDEN,
+            )
+            return Response(payload, status=status.HTTP_403_FORBIDDEN)
+
+        user = User.objects.filter(email=email).first()
+
+        if not user:
+            payload = build_response(
+                success=False,
+                message='usuario no encontrado',
+                body={'detail': 'no existe un usuario con este correo.'},
+                status_code=status.HTTP_404_NOT_FOUND,
+            )
+            return Response(payload, status=status.HTTP_404_NOT_FOUND)
+
+        data = request.data.copy()
+        data.pop('email', None)  # aqui evto cambiar correo
+
         serializer = UserProfileUpdateSerializer(
-            request.user,
-            data=request.data,
+            user,
+            data=data,
             partial=True
         )
 
@@ -204,3 +255,116 @@ class UserProfileUpdateView(APIView):
             status_code=status.HTTP_400_BAD_REQUEST,
         )
         return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+class PasswordResetRequestView(APIView):
+    """Views reset request"""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            payload = build_response(
+                success=False,
+                message='Errors validation',
+                body=serializer.errors,
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+        email = serializer.validated_data['email']
+        user = User.objects.filter(email=email).first()
+
+        if user:
+            token = generate_password_reset_token(user)
+            reset_link = f"{settings.PASSWORD_RESET_CONFIRM_URL}?token={token}"
+
+            send_mail(
+                subject='Recuperación de contraseña',
+                message=(
+                    'Se solicitó un restablecimiento de contraseña.\n\n'
+                    f'Usa este enlace o token para continuar:\n{reset_link}\n\n'
+                    f'Token: {token}'
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+
+        payload = build_response(
+            success=True,
+            message='Se ha enviado un correo con las instrucciones.',
+            body={},
+            status_code=status.HTTP_200_OK,
+        )
+        return Response(payload, status=status.HTTP_200_OK)
+
+
+class PasswordResetConfirmView(APIView):
+    """Views reset confirmation."""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            payload = build_response(
+                success=False,
+                message='Errors validation',
+                body=serializer.errors,
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+        token = serializer.validated_data['token']
+        new_password = serializer.validated_data['new_password']
+
+        try:
+            data = verify_password_reset_token(
+                token,
+                max_age=settings.PASSWORD_RESET_TOKEN_MAX_AGE
+            )
+        except SignatureExpired:
+            payload = build_response(
+                success=False,
+                message='token expirado',
+                body={'detail': 'el token ha expirado.'},
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+        except BadSignature:
+            payload = build_response(
+                success=False,
+                message='token invalido',
+                body={'detail': 'al token no es valido.'},
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.filter(
+            id=data['user_id'],
+            email=data['email']
+        ).first()
+
+        if not user:
+            payload = build_response(
+                success=False,
+                message='usuario no encontrado',
+                body={'detail': 'no se encontrp el usuario asociado al token.'},
+                status_code=status.HTTP_404_NOT_FOUND,
+            )
+            return Response(payload, status=status.HTTP_404_NOT_FOUND)
+
+        user.set_password(new_password)
+        user.save()
+
+        payload = build_response(
+            success=True,
+            message='la contraseña ha sido actualizada exitosamente.',
+            body={},
+            status_code=status.HTTP_200_OK,
+        )
+        return Response(payload, status=status.HTTP_200_OK)

@@ -42,4 +42,13 @@ proyecto de pasantia internship-2026-1
 # sub-issues Actualización de Perfil (Solo Datos Permitidos)
 ![imagen](./evidencias_1/screen_update_for_patch.png)
 
+# sub-issues Restablecimiento de Contraseña (Vía Email)
+![imagen](./evidencias_1/post_email_for_reset_pass.png)
+![imagen](./evidencias_1/post_token_newPasss.png)
+
+
+TAREA 
+crear un proyecto asignarle un nombre segun el contexto
+CONFIGURAR EL COR en otro proyecto
+EJEMPLO DE SU REPO DEL INGE EN LA RAMA 3 MUESTRA QUE TIENE DOS SERVICIO CORE + USERS
 

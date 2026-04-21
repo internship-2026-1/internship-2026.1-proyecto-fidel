@@ -120,3 +120,17 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             'username',
             'role',
         )
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """reset request"""
+    email = serializers.EmailField()
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """reset confirmation"""
+    token = serializers.CharField()
+    new_password = serializers.CharField(write_only=True, min_length=8)
+
+    def validate_new_password(self, value):
+        validate_password(value)
+        return value
