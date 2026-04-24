@@ -99,31 +99,9 @@ class UserListSerializer(serializers.ModelSerializer):
             'date_joined',
         )
 
-
-class UserProfileUpdateSerializer(serializers.ModelSerializer):
-    """Update authenticated user profile."""
-
-    class Meta:
-        model = User
-        fields = (
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'address',
-            'phone_number',
-            'country',
-            'role',
-        )
-        read_only_fields = (
-            'email',
-            'username',
-            'role',
-        )
-
 class PasswordResetRequestSerializer(serializers.Serializer):
     """reset request"""
-    email = serializers.EmailField()
+    email = serializers.EmailField(required=True)
 
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
@@ -134,3 +112,41 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     def validate_new_password(self, value):
         validate_password(value)
         return value
+
+
+#corrigiendo serializer de update to profile ()
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    """Defino que campos actualizar y que no"""
+    class Meta:
+        model = User
+        fields = (
+            'email',
+            'role',
+            'first_name',
+            'last_name',
+            'address',
+            'phone_number',
+            'country'
+        )
+        read_only = (
+            'username',
+            'email',
+            'role',
+        )
+        extra_kwargs = {
+            'first_name': {'required': False},
+            'last_name': {'required': False},
+            'address': {'required': False, 'allow_blank': True},
+            'phone_number': {'required': False, 'allow_blank': True},
+            'country': {'required': False, 'allow_blank': True},
+        }
+
+        # para un update tengo que obtener los campos 
+    def update(self, instance, validated_data):
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.address = validated_data.get('address', instance.address)
+        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
+        instance.country = validated_data.get('country', instance.country)
+        instance.save()
+        return instance

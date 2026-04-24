@@ -27,6 +27,7 @@ from .serializers import (
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.signing import BadSignature, SignatureExpired
+#model
 from .models import User
 
 
@@ -183,48 +184,21 @@ class UserListView(APIView):
         )
         return Response(payload, status=status.HTTP_200_OK)
 
-
+# en esta class actualiza mediante usuario autenticado
 class UserProfileUpdateView(APIView):
     """Update authenticated user profile."""
     permission_classes = [IsAuthenticated, HasGatewayApiKey]
 
     def patch(self, request):
-        email = request.data.get('email')
-
-        if not email:
-            payload = build_response(
-                success=False,
-                message='Errors validation',
-                body={'email': ['el correo es obligatorio para identificar al usurio.']},
-                status_code=status.HTTP_400_BAD_REQUEST,
-            )
-            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
-
-        if request.user.email != email:
-            payload = build_response(
-                success=False,
-                message='no puedes realizar cambio',
-                body={'detail': 'correo no coicide con el auth.'},
-                status_code=status.HTTP_403_FORBIDDEN,
-            )
-            return Response(payload, status=status.HTTP_403_FORBIDDEN)
-
-        user = User.objects.filter(email=email).first()
-
-        if not user:
-            payload = build_response(
-                success=False,
-                message='usuario no encontrado',
-                body={'detail': 'no existe un usuario con este correo.'},
-                status_code=status.HTTP_404_NOT_FOUND,
-            )
-            return Response(payload, status=status.HTTP_404_NOT_FOUND)
-
         data = request.data.copy()
-        data.pop('email', None)  # aqui evto cambiar correo
+
+        #ignoro estos camopos
+        data.pop('email', None)
+        data.pop('username', None)
+        data.pop('role', None)
 
         serializer = UserProfileUpdateSerializer(
-            user,
+            request.user,
             data=data,
             partial=True
         )
@@ -283,10 +257,10 @@ class PasswordResetRequestView(APIView):
             reset_link = f"{settings.PASSWORD_RESET_CONFIRM_URL}?token={token}"
 
             send_mail(
-                subject='Recuperación de contraseña',
+                subject='recuperación de contraseña',
                 message=(
-                    'Se solicitó un restablecimiento de contraseña.\n\n'
-                    f'Usa este enlace o token para continuar:\n{reset_link}\n\n'
+                    'se solicito un restablecimiento de contraseña.\n\n'
+                    f'usa este enlace o token para continuar:\n{reset_link}\n\n'
                     f'Token: {token}'
                 ),
                 from_email=settings.DEFAULT_FROM_EMAIL,
@@ -297,7 +271,7 @@ class PasswordResetRequestView(APIView):
         payload = build_response(
             success=True,
             message='Se ha enviado un correo con las instrucciones.',
-            body={},
+            body={'token: ':token}, #recordar eliminar la vista del token
             status_code=status.HTTP_200_OK,
         )
         return Response(payload, status=status.HTTP_200_OK)
@@ -353,7 +327,7 @@ class PasswordResetConfirmView(APIView):
             payload = build_response(
                 success=False,
                 message='usuario no encontrado',
-                body={'detail': 'no se encontrp el usuario asociado al token.'},
+                body={'detail': 'no se encontro el usuario asociado al token.'},
                 status_code=status.HTTP_404_NOT_FOUND,
             )
             return Response(payload, status=status.HTTP_404_NOT_FOUND)
