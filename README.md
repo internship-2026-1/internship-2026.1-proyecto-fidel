@@ -18,3 +18,37 @@ proyecto de pasantia internship-2026-1
 
 4. detiene el contenedor y lo desmonta
 ![imagen](./evidencias_1/detiene_el_contenedor_y_desmonta.png)
+
+# IP-003 Registro y Autenticación de Usuarios
+# sub-issues Servicio Django con django rest framework
+
+1. construir la imagen del servicio 
+![imagen](./evidencias_1/2-inicializando_docker-compose.png)
+
+2. respuesta del status 200 ok 
+![imagen](./evidencias_1/2-response_status_200_pk_hello_world.png)
+
+# sub-issues Configuracion de base de datos y Cliente para base datos
+![imagen](./evidencias_1/config_DB_add_client_base.png) 
+
+# sub-issues Servicio para registrar un usuario
+![imagen](./evidencias_1/registrar_usuario_evidencia_postman.png)
+![imagen](./evidencias_1/administrar_users_created.png)
+
+# sub-issues Autenticación (Login) + add campos (uuid,role) + structure responce
+![imagen](./evidencias_1/created_user.png)
+![imagen](./evidencias_1/login_user.png)
+
+# sub-issues Actualización de Perfil (Solo Datos Permitidos)
+![imagen](./evidencias_1/screen_update_for_patch.png)
+
+# sub-issues Restablecimiento de Contraseña (Vía Email)
+![imagen](./evidencias_1/post_email_for_reset_pass.png)
+![imagen](./evidencias_1/post_token_newPasss.png)
+
+
+TAREA 
+crear un proyecto asignarle un nombre segun el contexto
+CONFIGURAR EL COR en otro proyecto
+EJEMPLO DE SU REPO DEL INGE EN LA RAMA 3 MUESTRA QUE TIENE DOS SERVICIO CORE + USERS
+

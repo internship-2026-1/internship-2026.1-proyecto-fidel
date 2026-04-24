@@ -1,1 +1,7 @@
 commands.txt
+
+docs/
+services/users/apps/help.py
+commands.txt
+.env
+__pycache__/
