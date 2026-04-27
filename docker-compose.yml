@@ -10,18 +10,20 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro,Z
     depends_on:
       - users
+      - core
     labels:
      - "ip_getaway.version=1.0"
     networks:
       - ip_network
 
+ #servicios users
   users:
     build:
       context: ./services/users
     container_name: ip_users
     command: sh -c "python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - ./services/users:/app
+      - ./services/users:/app:Z #agregue un cambio en la Z
     env_file:
       - .env
     environment:
@@ -35,6 +37,7 @@ services:
     networks:
       - ip_network
 
+ # servicio se base de datos user
   users_db:
     image: postgres:15-alpine
     container_name: users_db
@@ -54,6 +57,7 @@ services:
     networks:
       - ip_network
 
+ # servicios de pgAdmin la interfaz user
   pgadmin:
     image: dpage/pgadmin4:8.5
     container_name: ip_pgadmin
@@ -73,11 +77,116 @@ services:
     networks:
       - ip_network
 
+  # servicio core nuevo !
+  core:
+    build:
+      context: ./services/core
+    container_name: ip_core
+    command: sh -c "python manage.py runserver 0.0.0.0:8001"
+    volumes:
+      - ./services/core:/app:Z
+    env_file:
+      - .env
+    environment:
+      ODOO_URL: ${ODOO_URL}
+      ODOO_DB: ${ODOO_DB}
+      ODOO_USERNAME: ${ODOO_USERNAME}
+      ODOO_API_KEY: ${ODOO_API_KEY}
+      # mapear puertos
+    ports:
+      - "8001:8001"
+    depends_on:
+      core_db:
+        condition: service_healthy
+    networks:
+      - ip_network
 
+ # servicio se base de datos core nuevo.!
+  core_db:
+    image: postgres:15-alpine
+    container_name: core_db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${CORE_POSTGRES_DB}
+      POSTGRES_USER: ${CORE_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${CORE_POSTGRES_PASSWORD}
+    volumes:
+      - cores_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${CORE_POSTGRES_USER} -d ${CORE_POSTGRES_DB} -h localhost || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - ip_network
+
+ # servicios de pgAdmin la interfaz CORE.!
+  pgadmin_core:
+    image: dpage/pgadmin4:8.5
+    container_name: ip_pgadmin_core
+    env_file:
+      - .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${CORE_PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${CORE_PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "5051:80"
+    depends_on:
+      core_db:
+        condition: service_healthy
+    volumes:
+      - pgadmin_core_data:/var/lib/pgadmin
+    networks:
+      - ip_network
+
+  # servicio de mongo nuevo .!
+  mongodb:
+    image: mongo:7-jammy
+    container_name: mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - ip_network  
+
+  #servicio para interfaz
+  mongo_express:
+    image: mongo-express:1.0.2
+    container_name: ip_mongo_express
+    restart: always
+    depends_on:
+      - mongodb
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH_USERNAME: ${CORE_ME_CONFIG_BASICAUTH_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${CORE_ME_CONFIG_BASICAUTH_PASSWORD}
+    ports:
+      - "5052:8081"
+    networks:
+      - ip_network  
+
+ # la red bridge
 networks:
   ip_network:
     driver: bridge
 
+# los volumens
 volumes:
   users_db_data:
   pgadmin_data:
+  #core
+  cores_db_data:
+  pgadmin_core_data:
+  #mongodb
+  mongodb_data:

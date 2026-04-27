@@ -46,9 +46,7 @@ proyecto de pasantia internship-2026-1
 ![imagen](./evidencias_1/post_email_for_reset_pass.png)
 ![imagen](./evidencias_1/post_token_newPasss.png)
 
+# IP-004 Implementación del Core Service e Infraestructura de Sincronización
 
-TAREA 
-crear un proyecto asignarle un nombre segun el contexto
-CONFIGURAR EL COR en otro proyecto
-EJEMPLO DE SU REPO DEL INGE EN LA RAMA 3 MUESTRA QUE TIENE DOS SERVICIO CORE + USERS
-
+# sub-issue Infraestructura Docker, Redes y Gateway
+![imagen](./evidencias_1/infra_docker_redes_GWY_core.png)
