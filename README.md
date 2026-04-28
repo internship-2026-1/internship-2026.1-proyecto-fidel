@@ -50,3 +50,12 @@ proyecto de pasantia internship-2026-1
 
 # sub-issue Infraestructura Docker, Redes y Gateway
 ![imagen](./evidencias_1/infra_docker_redes_GWY_core.png)
+
+
+{
+  "order_id": "ORD-1001",
+  "product_name": "Laptop Lenovo"
+}
+
+
+ver clases vienes nota

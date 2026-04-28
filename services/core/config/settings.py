@@ -16,6 +16,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'api',# muesta toda la app de core
+
+    #empezar a definir mis apps
+    'catalog.apps.CatalogConfig',
+    'transaction.apps.TransactionConfig',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +55,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # config para usar postgres
 DB_ENGINE = os.environ.get("CORES_DB_ENGINE", os.environ.get("DB_ENGINE", "sqlite")).lower()
 
+#configurando  DATABASES con postgresql y mongodb.
 if DB_ENGINE == "postgresql":
     DATABASES = {
         "default": {
@@ -88,6 +93,8 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+
+DATABASE_ROUTER= ['config.db_routers.DatabaseRouter']
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
