@@ -15,7 +15,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'api',# muesta toda la app de core
+    'apps',# muesta toda la app de core
 
     #empezar a definir mis apps
     'catalog.apps.CatalogConfig',
@@ -126,3 +126,9 @@ SPECTACULAR_SETTINGS = {
         }
     ],
 }
+
+#ODOO
+ODOO_URL = os.environ.get('ODOO_URL')
+ODOO_DB = os.environ.get('ODOO_DB')
+ODOO_USERNAME = os.environ.get('ODOO_USERNAME')
+ODOO_API_KEY = os.environ.get('ODOO_API_KEY')
