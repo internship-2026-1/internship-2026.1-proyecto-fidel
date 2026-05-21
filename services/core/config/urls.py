@@ -1,13 +1,9 @@
-from django.contrib import admin 
-from django.urls import path
-from apps.views import health_check, TestConnection
-
-"""agregando url de admin"""
+"""Rutas principales del proyecto."""
+from django.contrib import admin
+from django.urls import include, path
 
 urlpatterns = [
-    #admin
-    path('admin/', admin.site.urls),
-    #check
-    path('health/',health_check),
-    path('test-db/',TestConnection.as_view(), name='test_db')
+    #Django admin y apps
+    path("admin/", admin.site.urls),
+    path("apps/", include("apps.urls")),
 ]

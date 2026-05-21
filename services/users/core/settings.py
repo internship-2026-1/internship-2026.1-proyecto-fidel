@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',#cambio JWT
     'drf_spectacular',
     'apps', # Registrar la app de usuarios
+    "corsheaders", #cors
 ]
 
 MIDDLEWARE = [
@@ -28,6 +29,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",#cors
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -149,6 +151,15 @@ PASSWORD_RESET_CONFIRM_URL = os.environ.get(
     'PASSWORD_RESET_CONFIRM_URL',
     'http://localhost:8080/user/api/v1/auth/password-reset/confirm/'
 )
+
+# config cors
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
 
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'no-reply@example.com')
 

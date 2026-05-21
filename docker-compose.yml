@@ -176,7 +176,34 @@ services:
     networks:
       - ip_network  
 
- # la red bridge
+  # Broker para celery
+  redis:
+    image: redis:alpine
+    container_name: ip_redis
+    command: redis-server --requirepass redis_pass
+    ports:
+      - "6379:6379"
+    networks:
+      - ip_network
+
+  # procesa las tareas de odoo
+  core_worker:
+    build:
+      context: ./services/core
+    container_name: ip_core_work
+    command: celery -A config worker --loglevel=info
+    volumes:
+      - ./services/core:/app:Z
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - core_db
+      - mongodb
+    networks:
+      - ip_network
+
+# la red bridge ip_core
 networks:
   ip_network:
     driver: bridge

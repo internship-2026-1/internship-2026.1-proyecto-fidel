@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from mongoengine import connect
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -14,12 +15,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # terceros
     'rest_framework',
+    'drf_spectacular',
+    #falta
     'apps',# muesta toda la app de core
 
-    #empezar a definir mis apps
-    'catalog.apps.CatalogConfig',
+    #apps propios
+    'apps.catalog',
+    'apps.orders',
+    'apps.products',
+    'apps.transactions',
     'transaction.apps.TransactionConfig',
+
+    "corsheaders", #cors
 ]
 
 MIDDLEWARE = [
@@ -30,6 +39,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",#cors
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -65,26 +75,7 @@ if DB_ENGINE == "postgresql":
             "PASSWORD": os.environ.get("CORE_DB_PASSWORD", os.environ.get("CORE_POSTGRES_PASSWORD", "core_pass")),
             "HOST": os.environ.get("CORE_DB_HOST", os.environ.get("CORE_POSTGRES_HOST", "core_db")),
             "PORT": os.environ.get("CORE_DB_PORT", os.environ.get("CORE_POSTGRES_PORT", "5432")),
-        },
-        "postgresql_db": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ.get("CORE_DB_NAME", os.environ.get("CORE_POSTGRES_DB", "core_db")),
-            "USER": os.environ.get("CORE_DB_USER", os.environ.get("CORE_POSTGRES_USER", "core_user")),
-            "PASSWORD": os.environ.get("CORE_DB_PASSWORD", os.environ.get("CORE_POSTGRES_PASSWORD", "core_pass")),
-            "HOST": os.environ.get("CORE_DB_HOST", os.environ.get("CORE_POSTGRES_HOST", "core_db")),
-            "PORT": os.environ.get("CORE_DB_PORT", os.environ.get("CORE_POSTGRES_PORT", "5432")),
-        },
-        "mongodb": {
-            "ENGINE": "django_mongodb_backend",
-            "NAME": os.environ.get("MONGO_DB", "core_catalog"),
-            "HOST": os.environ.get("MONGO_HOST", "mongodb"),
-            "PORT": int(os.environ.get("MONGO_PORT", "27017")),
-            "USER": os.environ.get("MONGO_USER", "core_mongo_user"),
-            "PASSWORD": os.environ.get("MONGO_PASSWORD", "core_mongo_pass"),
-            "OPTIONS": {
-                "authSource": os.environ.get("MONGO_AUTH_SOURCE", "admin"),
-            },
-        },            
+        }
     }
 else:
     DATABASES = {
@@ -94,7 +85,6 @@ else:
         }
     }
 
-DATABASE_ROUTER= ['config.db_routers.DatabaseRouter']
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -112,6 +102,9 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],   
 }
 
 # config drf-spectacular doc para swagger
@@ -127,8 +120,34 @@ SPECTACULAR_SETTINGS = {
     ],
 }
 
+#gate keys
+GATEWAY_API_KEY = os.environ.get('GATEWAY_API_KEY')
+GATEWAY_ORIGIN = os.environ.get('GATEWAY_ORIGIN')
+
 #ODOO
 ODOO_URL = os.environ.get('ODOO_URL')
 ODOO_DB = os.environ.get('ODOO_DB')
 ODOO_USERNAME = os.environ.get('ODOO_USERNAME')
 ODOO_API_KEY = os.environ.get('ODOO_API_KEY')
+
+#mongo engine
+connect(
+    db=os.getenv("MONGO_DB", "core_catalog"),
+    username=os.getenv("MONGO_USER", "core_mongo_user"),
+    password=os.getenv("MONGO_PASSWORD", "core_mongo_pass"),
+    host=f'mongodb://{os.getenv("MONGO_HOST", "mongodb")}:{os.getenv("MONGO_PORT", "27017")}/{os.getenv("MONGO_DB", "core_catalog")}',
+    authentication_source=os.getenv("MONGO_AUTH_SOURCE", "admin"),
+    alias="default",
+)
+
+# config celery
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
+
+# config cors
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+CORS_ALLOW_CREDENTIALS = True
