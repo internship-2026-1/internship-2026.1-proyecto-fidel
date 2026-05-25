@@ -15,6 +15,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(write_only=True)
     role = serializers.CharField(required=False)
     created_at = serializers.DateTimeField(source='date_joined', read_only=True)
+    updated_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = User
@@ -27,15 +28,32 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             'last_name', 
             'phone', 
             'created_at',
-            'role'
+            'updated_at',
+            'role',
+            'status',
             )
+        extra_kwargs = {
+            'username': {'read_only': True}
+        }
+
+    # queiro resolver username desde el back
+    def generateUsername(self, first_name, last_name):
+        base = f"{first_name[:5]}{last_name[:2]}".lower()
+        username = base
+        counter = 1
+
+        while User.objects.filter(username=username).exists():
+            username=f"{base}{counter}"
+            counter += 1
+
+        return username
     
-    def validate_username(self, value):
-        if len(value) < 3 or len(value) > 30:
-            raise serializers.ValidationError('username debe tener entre 3 y 30 caracteres.')
-        if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError('este nombre de usuario ya existe.')
-        return value
+    #def validate_username(self, value):
+    #    if len(value) < 3 or len(value) > 30:
+    #        raise serializers.ValidationError('username debe tener entre 3 y 30 caracteres.')
+    #    if User.objects.filter(username=value).exists():
+    #        raise serializers.ValidationError('este nombre de usuario ya existe.')
+    #    return value
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
@@ -54,10 +72,18 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         phone = validated_data.pop('phone')
         password = validated_data.pop('password')
+        role = validated_data.pop('role', 'b2c')
+        status = validated_data.pop('status', 'activo')
+        first_name = validated_data.get('first_name')
+        last_name = validated_data.get('last_name')
+        username = self.generateUsername(first_name, last_name)
 
         user = User.objects.create_user(
+            username=username,
             password = password,
             phone_number = phone,
+            role=role,
+            status=status,
             **validated_data
             )
         user.save()
@@ -97,6 +123,9 @@ class UserListSerializer(serializers.ModelSerializer):
             'phone_number',
             'country',
             'date_joined',
+            'role',
+            'status',
+            'updated_at'
         )
 
 class PasswordResetRequestSerializer(serializers.Serializer):
@@ -128,7 +157,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             'phone_number',
             'country'
         )
-        read_only = (
+        read_only_fields = (
             'username',
             'email',
             'role',
@@ -150,3 +179,11 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         instance.country = validated_data.get('country', instance.country)
         instance.save()
         return instance
+
+class UserRoleStatusPatchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'role',
+            'status',
+        )

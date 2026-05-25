@@ -152,6 +152,7 @@ class IntegrateProductsFromOdooViews(APIView):
                     product.name = item.get("name", product.name)
                     product.base_price = item.get("base_price", product.base_price)
                     product.stock = item.get("stock", product.stock)
+                    product.status = item.get("status", product.status or "activo")
                     product.images = item.get("images", product.images)
                     product.updated_at = datetime.utcnow()
                     product.save()
@@ -164,6 +165,7 @@ class IntegrateProductsFromOdooViews(APIView):
                         name=item.get("name", ""),
                         base_price=item.get("base_price", 0),
                         stock=item.get("stock", 0),
+                        status=item.get("status", "activo"),
                         images=item.get("images", []),
                         created_at=datetime.utcnow(),
                         updated_at=datetime.utcnow(),
@@ -239,6 +241,7 @@ class SyncProductsFromJsonViews(APIView):
                     product.name = data["name"]
                     product.base_price = data.get("base_price", product.base_price)
                     product.stock = data.get("stock", product.stock)
+                    product.status = data.get("status", product.status or "activo")
                     product.updated_at = datetime.utcnow()
                     product.save()
 
@@ -251,6 +254,7 @@ class SyncProductsFromJsonViews(APIView):
                         name=data["name"],
                         base_price=data.get("base_price", 0),
                         stock=data.get("stock", 0),
+                        status=data.get("status", "activo"),
                         created_at=datetime.utcnow(),
                         updated_at=datetime.utcnow(),
                     )

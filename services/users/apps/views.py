@@ -22,6 +22,7 @@ from .serializers import (
     UserProfileUpdateSerializer,
     PasswordResetRequestSerializer,
     PasswordResetConfirmSerializer,
+    UserRoleStatusPatchSerializer,
 )
 
 from django.conf import settings
@@ -29,7 +30,8 @@ from django.core.mail import send_mail
 from django.core.signing import BadSignature, SignatureExpired
 #model
 from .models import User
-
+# capturar error
+import traceback
 
 class UserRegisterView(APIView):
     """created users view."""
@@ -57,28 +59,39 @@ class UserRegisterView(APIView):
     )
 
     def post(self, request):
-        serializer = UserRegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
+
+        try:
+            serializer = UserRegisterSerializer(data=request.data)
+
+            if serializer.is_valid():
+                
+                user = serializer.save()
+
+                payload = build_response(
+                    success=True,
+                    message='Users created successfully',
+                    body={
+                        'id': str(user.id),
+                        'email': user.email,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                    },
+                    status_code=status.HTTP_201_CREATED
+                )
+                return Response(payload, status=status.HTTP_201_CREATED)
+
             payload = build_response(
-                success=True,
-                message='Users created successfully',
-                body={
-                    'id': str(user.id),
-                    'email': user.email,
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
-                },
-                status_code=status.HTTP_201_CREATED
+                success=False,
+                message='Errors validation',
+                body=serializer.errors,
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
-            return Response(payload, status=status.HTTP_201_CREATED)
-        payload = build_response(
-            success=False,
-            message='Errors validation',
-            body=serializer.errors,
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
-        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Exception as e:
+            print("ERROR REAL:", type(e).__name__, str(e))
+            traceback.print_exc()
+            raise e
 
 
 class UserLoginView(APIView):
@@ -98,6 +111,14 @@ class UserLoginView(APIView):
                 body={
                     'access': str(refresh.access_token),
                     'refresh': str(refresh),
+                    'user': {
+                        'id': str(user.id),
+                        'email': user.email,
+                        'username': user.username,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'role': user.role,
+                    }                    
                 },
                 status_code=status.HTTP_200_OK
             )
@@ -342,3 +363,119 @@ class PasswordResetConfirmView(APIView):
             status_code=status.HTTP_200_OK,
         )
         return Response(payload, status=status.HTTP_200_OK)
+
+# cambios definidos por metodo patch
+class UserRoleStatusPatchView(APIView):
+    def patch(self, request, pk):
+        user = User.objects.filter(id=pk).first()
+
+        if not user:
+            payload = build_response(
+                success=False,
+                message='Usuario no encontrado',
+                body={'id': pk},
+                status_code=status.HTTP_404_NOT_FOUND,
+            )
+            return Response(payload, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UserRoleStatusPatchSerializer(
+            user,
+            data=request.data,
+            partial=True
+        )
+
+        if not serializer.is_valid():
+            payload = build_response(
+                success=False,
+                message='Datos invalidos',
+                body=serializer.errors,
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save()
+
+        payload = build_response(
+            success=True,
+            message='Usuario actualizado correctamente',
+            body=serializer.data,
+            status_code=status.HTTP_200_OK,
+        )
+
+        return Response(payload, status=status.HTTP_200_OK)
+
+#deje este para un endpoint rapido y no destruir el update patch anterior
+class UpdateProfileView(APIView):
+    """ver y actualizar perfil del usuario autenticado"""
+    permission_classes = [IsAuthenticated, HasGatewayApiKey]
+
+    def get(self, request):
+        user = request.user
+
+        payload = build_response(
+            success=True,
+            message='Perfil obtenido correctamente',
+            body={
+                'id': str(user.id),
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'address': user.address,
+                'phone_number': user.phone_number,
+                'country': user.country,
+                'role': user.role,
+                'status': user.status,
+            },
+            status_code=status.HTTP_200_OK,
+        )
+
+        return Response(payload, status=status.HTTP_200_OK)
+
+    def put(self, request):
+        data = request.data.copy()
+
+        data.pop('id', None)
+        data.pop('username', None)
+        data.pop('email', None)
+        data.pop('role', None)
+        data.pop('status', None)
+        data.pop('password', None)
+
+        serializer = UserProfileUpdateSerializer(
+            request.user,
+            data=data,
+            partial=True
+        )
+
+        if serializer.is_valid():
+            user = serializer.save()
+
+            payload = build_response(
+                success=True,
+                message='Perfil actualizado correctamente',
+                body={
+                    'id': str(user.id),
+                    'username': user.username,
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'address': user.address,
+                    'phone_number': user.phone_number,
+                    'country': user.country,
+                    'role': user.role,
+                    'status': user.status,
+                },
+                status_code=status.HTTP_200_OK,
+            )
+
+            return Response(payload, status=status.HTTP_200_OK)
+
+        payload = build_response(
+            success=False,
+            message='Datos inválidos',
+            body=serializer.errors,
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)

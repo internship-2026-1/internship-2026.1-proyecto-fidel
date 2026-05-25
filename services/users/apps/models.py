@@ -32,10 +32,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     address = models.CharField(max_length=255, blank=True)
     phone_number = models.CharField(max_length=20, blank=True)
     country = models.CharField(max_length=50, blank=True)
     role = models.CharField(max_length=20, default='b2c')
+    status = models.CharField(max_length=20, default='activo')
 
     objects = UserManager()
 

@@ -17,10 +17,11 @@ class OrderSerializers(serializers.ModelSerializer):
         model = Order
 
         fields = [
-            'id', 'customer_id', 'total_amount', 'status',
-            'odoo_sale_order_id', 'created_at', 'items', 'updated_at'
+            'id', 'customer_id', 'customer_name', 'total_amount', 'status',
+            'created_at', 'items', 'updated_at'
         ]
 
-        read_only_fields = ['id', 'created_at', 'odoo_sale_order_id', 'total_amount', 'status']
+        read_only_fields = ['id', 'created_at', 'total_amount', 'status']
+
 
 

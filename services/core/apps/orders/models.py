@@ -28,6 +28,7 @@ class Order(models.Model):
     odoo_sale_order_id = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    customer_name = models.CharField(max_length=150, null=True, blank=True)
 
     class Meta:
         db_table = "orders"

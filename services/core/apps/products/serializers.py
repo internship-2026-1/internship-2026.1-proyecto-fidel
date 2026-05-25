@@ -17,6 +17,8 @@ class ProductSerializers(serializers.Serializer):
     specifications = serializers.DictField(required=False)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
+    catalog_name = serializers.SerializerMethodField()
+    status = serializers.CharField(required=False, default="activo")
 
     def create(self, validated_data):
         catalog_id = validated_data.pop("catalog", None)
@@ -43,9 +45,14 @@ class ProductSerializers(serializers.Serializer):
                 instance.catalog = None
 
         for key, value in validated_data.items():
-            setattr(instance, key, value)
+            if key != "catalog":
+                setattr(instance, key, value)
+
         instance.save()
         return instance
+    
+    def get_catalog_name(self, obj):
+        return obj.catalog.name if obj.catalog else ""
 
 #listo
 class SyncProductSerializers(serializers.Serializer):
@@ -55,6 +62,7 @@ class SyncProductSerializers(serializers.Serializer):
     name = serializers.CharField(required=True)
     base_price = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
     stock = serializers.IntegerField(required=True)
+    status = serializers.CharField(required=False, default="activo")
 
 #listo
 class EnrichProductSerializers(serializers.Serializer):

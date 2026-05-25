@@ -10,6 +10,7 @@ class Catalog(Document):
     id = UUIDField(primary_key=True, default=uuid.uuid4)
     name = StringField(required=True)
     description = StringField(default="")
+    status = StringField(default="activo", choices=("activo", "inactivo"))
     created_at = DateTimeField(default=datetime.utcnow)
     updated_at = DateTimeField(default=datetime.utcnow)
 

@@ -88,11 +88,24 @@ services:
     env_file:
       - .env
     environment:
+      #credenciales de odoo
       ODOO_URL: ${ODOO_URL}
       ODOO_DB: ${ODOO_DB}
       ODOO_USERNAME: ${ODOO_USERNAME}
       ODOO_API_KEY: ${ODOO_API_KEY}
-      # mapear puertos
+      #credenciales cloudinary
+      #CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}==cloudinary
+      #CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      #CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+
+      #credenciales de stripe
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      STRIPE_SUCCESS_URL: ${STRIPE_SUCCESS_URL}
+      STRIPE_CANCEL_URL: ${STRIPE_CANCEL_URL}
+      
+    # mapear puertos
     ports:
       - "8001:8001"
     depends_on:

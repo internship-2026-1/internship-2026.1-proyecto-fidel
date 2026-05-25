@@ -23,6 +23,7 @@ class Product(Document):
     # fechas interno
     created_at = DateTimeField(default=datetime.utcnow)
     updated_at = DateTimeField(default=datetime.utcnow)
+    status = StringField(default="activo", choices=("activo", "inactivo", "agotado"))
 
     meta = {
         "collection": "products",

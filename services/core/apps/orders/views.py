@@ -41,6 +41,7 @@ class OrderCreateListViews(APIView):
         try:
             order = OrderService.create_order_with_stock_check(
                 customer_id=serializer.validated_data["customer_id"],
+                customer_name=serializer.validated_data.get("customer_name"),
                 items_data=serializer.validated_data["items"],
             )
 
@@ -115,3 +116,20 @@ class SimulandoPago(APIView):
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
             return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+
+class OrderByCustomerViews(APIView):
+    """listar orders por customer_id"""
+
+    def get(self, request, customer_id):
+        orders = Order.objects.filter(customer_id=customer_id).order_by("-created_at")
+        serializer = OrderSerializers(orders, many=True)
+
+        payload = build_response(
+            success=True,
+            message="ordenes del cliente listadas correctamente",
+            body=serializer.data,
+            status_code=status.HTTP_200_OK,
+        )
+
+        return Response(payload, status=status.HTTP_200_OK)

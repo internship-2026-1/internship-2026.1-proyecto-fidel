@@ -16,7 +16,7 @@ class OrderService:
 
     @staticmethod
     @transaction.atomic
-    def create_order_with_stock_check(customer_id, items_data):
+    def create_order_with_stock_check(customer_id, items_data, customer_name=None):
         """valida productos en mongo crea la orden en PostgreSQL y descuenta stock local en MongoDB."""
 
         total_amount = Decimal("0.00")
@@ -51,6 +51,7 @@ class OrderService:
         order = Order.objects.create(
             order_number=f"ORD-{uuid.uuid4().hex[:10].upper()}",
             customer_id=customer_id,
+            customer_name=customer_name,
             total_amount=total_amount,
             #status="PENDING",
             status=Order.STATUS_PENDING, # solo para probar como va mi post de procesar pagos

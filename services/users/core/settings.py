@@ -153,12 +153,12 @@ PASSWORD_RESET_CONFIRM_URL = os.environ.get(
 )
 
 # config cors
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
-
-CORS_ALLOW_CREDENTIALS = True
+##CORS_ALLOWED_ORIGINS = [
+##    "http://localhost:5173",
+##    "http://127.0.0.1:5173",
+##]
+##
+##CORS_ALLOW_CREDENTIALS = True
 
 
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'no-reply@example.com')

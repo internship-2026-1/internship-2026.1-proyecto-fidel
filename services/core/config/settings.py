@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from mongoengine import connect
+#import cloudinary #new
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,6 +27,7 @@ INSTALLED_APPS = [
     'apps.orders',
     'apps.products',
     'apps.transactions',
+    'apps.payments',
     'transaction.apps.TransactionConfig',
 
     "corsheaders", #cors
@@ -144,10 +146,18 @@ connect(
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
 
-# config cors
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+#config de cloudinary
+#cloudinary.config(
+#    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+#    api_key=os.environ.get('CLOUDINARY_API_KEY'),
+#    api_secret=os.environ.get('CLOUDINARY_API_SECRET'),
+#    secure=True
+#)
 
-CORS_ALLOW_CREDENTIALS = True
+# config cors
+##CORS_ALLOWED_ORIGINS = [
+##    "http://localhost:5173",
+##    "http://127.0.0.1:5173",
+##]
+##
+##CORS_ALLOW_CREDENTIALS = True
